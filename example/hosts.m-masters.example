@@ -13,6 +13,7 @@
 192.168.1.2
 
 # 负载均衡至少两个节点，安装 haproxy+keepalived
+# 如果是公有云环境请优先使用云上负载均衡，lb组留空
 [lb]
 192.168.1.1 LB_IF="eth0" LB_ROLE=backup  # 注意根据实际使用网卡设置 LB_IF变量
 192.168.1.2 LB_IF="eth0" LB_ROLE=master
@@ -41,15 +42,19 @@ DEPLOY_MODE=multi-master
 #集群主版本号，目前支持: v1.8, v1.9, v1.10
 K8S_VER="v1.10"
 
-#集群 MASTER IP即 LB节点VIP地址，为区别与默认apiserver端口，设置VIP监听的服务端口8443
+# 集群 MASTER IP即 LB节点VIP地址，为区别与默认apiserver端口，设置VIP监听的服务端口8443
+# 公有云上请使用云负载均衡内网地址和监听端口
 MASTER_IP="192.168.1.10"
 KUBE_APISERVER="https://{{ MASTER_IP }}:8443"
 
 #TLS Bootstrapping 使用的 Token，使用 head -c 16 /dev/urandom | od -An -t x | tr -d ' ' 生成
 BOOTSTRAP_TOKEN="c30302226d4b810e08731702d3890f50"
 
-# 集群网络插件，目前支持calico和flannel
+# 集群网络插件，目前支持calico, flannel, kube-router
 CLUSTER_NETWORK="flannel"
+
+# 默认使用kube-proxy, 可选SERVICE_PROXY="IPVS" (前提是网络选择kube-router)
+SERVICE_PROXY="kube-proxy"
 
 # 服务网段 (Service CIDR），注意不要与内网已有网段冲突
 SERVICE_CIDR="10.68.0.0/16"
